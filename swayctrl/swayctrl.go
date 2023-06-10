@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -53,6 +54,11 @@ var cmds = []subcmd.Command{
 		Name:        "focustitle",
 		Description: "print the titles of the currently focused node whenever focus changes",
 		Do:          cmdFocusTitle,
+	},
+	{
+		Name:        "swaymsg",
+		Description: "run swaymsg with the correct SWAYSOCK",
+		Do:          cmdSwaymsg,
 	},
 	{
 		Name:        "daemon",
@@ -499,6 +505,41 @@ func (h *focusHandler) Window(ctx context.Context, e sway.WindowEvent) {
 		if e.Container.Focused {
 			fmt.Println()
 		}
+	}
+}
+
+func cmdSwaymsg(args []string) {
+	// Don't use flag here because we want to be able to write (for example)
+	//
+	// 	swayctrl swaymsg -v
+	//
+	// rather than
+	//
+	// 	swayctrl swaymsg -- -v
+	//
+	// Print out the help text if no args were provided, though ('swaymsg'
+	// by itself does nothing and prints nothing).
+	if len(args) == 0 {
+		fmt.Fprint(os.Stderr, `Usage:
+
+swayctrl swaymsg [flags...]
+
+The swaymsg command simply runs swaymsg, but it sets the correct SWAYSOCK
+environment variable.
+`)
+		os.Exit(2)
+	}
+
+	cmd := exec.Command("swaymsg", args...)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err := cmd.Run()
+	var ee *exec.ExitError
+	if errors.As(err, &ee) && ee.Exited() {
+		os.Exit(ee.ExitCode())
+	}
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
