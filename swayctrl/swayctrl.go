@@ -533,6 +533,7 @@ environment variable.
 	cmd := exec.Command("swaymsg", args...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
 	err := cmd.Run()
 	var ee *exec.ExitError
 	if errors.As(err, &ee) && ee.Exited() {
