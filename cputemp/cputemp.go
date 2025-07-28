@@ -50,8 +50,11 @@ func findTempFile() (string, error) {
 		deviceName string
 		label      string
 	}{
-		{deviceName: "k10temp", label: "Tctl"},          // AMD Ryzen 9 3900X
-		{deviceName: "coretemp", label: "Package id 0"}, // Intel Core i7-8565U
+		// AMD Ryzen 9 3900X
+		{deviceName: "k10temp", label: "Tctl"},
+		// Intel Core i7-8565U
+		// Intel Core Ultra 7 155H
+		{deviceName: "coretemp", label: "Package id 0"},
 	} {
 		path, err := resolveTempFile(opt.deviceName, opt.label)
 		if errors.Is(err, errTempFileNotFound) {
